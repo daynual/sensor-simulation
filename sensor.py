@@ -23,7 +23,7 @@ max_bound = 2**adc_bitwidth - 1
 min_bound = 1
 lowBound = 2047 - 10
 upperBound = 2047 + 10
-length = 1
+strain = 1
 dacIncrement = 1023
 
 
@@ -89,6 +89,8 @@ def calibrate():
     while (runCalibrate):
         adc_val = adc(inamp(sensor_val, dac(dac_val, dac_bitwidth), 2.5, gain), adc_bitwidth)
         dt += 1
+        
+        
 
         #CHANGES THE DAC OUTPUT
         if(adc_val <= lowBound):
@@ -100,6 +102,13 @@ def calibrate():
 
 
         adc_val = adc(inamp(sensor_val, dac(dac_val, dac_bitwidth), 2.5, gain), adc_bitwidth)
+
+        x_vals.append(dt)
+        #y_vals.append(round(float(sensor_val), 5))  #sensor voltage
+        #a_vals.append(round(float(inamp(sensor_val, dac(dac_val, dac_bitwidth), 2.5, gain)), 5)) #inamp voltage
+        y_vals.append(adc(sensor_val, adc_bitwidth))
+        a_vals.append(adc(inamp(sensor_val, dac(dac_val, dac_bitwidth), 2.5, gain), adc_bitwidth))
+        
 
         #CHECKS IF ADC READING IS WITHIN RANGE
         if((adc_val >= lowBound) and (adc_val <= upperBound)):
@@ -117,28 +126,28 @@ def calibrate():
 
         #print(adc(inamp(sensor_val, dac(dac_val, dac_bitwidth), 2.5, gain), adc_bitwidth))
         #print(dacIncrement)
-        time.sleep(.1)
+        time.sleep(0.001)
 
 def sensorReading():
     global sensor_val, dt
 
     while True:
-        sensor_val = sensor(100, length, 1)
+        sensor_val = sensor(100, strain, 1)
         dt += 1
         time.sleep(.001)
     
 
 def check_key():
-    global run, length, runCalibrate, dacIncrement, runSensor, sensor_val, dac_val, dt
+    global run, strain, runCalibrate, dacIncrement, runSensor, sensor_val, dac_val, dt
 
     while True:
         if keyboard.is_pressed('9'):
-            length -= .01
-            print(length)
+            strain -= .01
+            print(strain)
             time.sleep(.2)
         elif keyboard.is_pressed('0'):
-            length += .01
-            print(length)
+            strain += .01
+            print(strain)
             time.sleep(.2)
         elif keyboard.is_pressed('1'):
             runCalibrate = True
@@ -148,13 +157,13 @@ def check_key():
         else:
             print('inamp volt: ', inamp(sensor_val, dac(dac_val, dac_bitwidth), 2.5, gain))
             print('sensor volt: ', round(float(sensor_val), 2))
-            print('length: ', length)
+            print('length: ', strain)
             print(dac_val)
             print('')
             time.sleep(.1)
 
-t1 = threading.Thread(target=check_key)
-t2 = threading.Thread(target=sensorReading)
+#t1 = threading.Thread(target=check_key)
+#t2 = threading.Thread(target=sensorReading)
 
 
 def animate(i):
@@ -165,21 +174,32 @@ def animate(i):
     a_vals.append(round(float(inamp(sensor_val, dac(dac_val, dac_bitwidth), 2.5, gain)), 5)) #inamp voltage
 
     plt.cla()
-    plt.plot(x_vals, y_vals, label = "sensor")
-    plt.plot(x_vals, a_vals, label = "inamp")
-    plt.ylabel('volt')
 
 
 dac_bitwidth = int(input('Enter DAC Bitwidth: '))
 adc_bitwidth = int(input('Enter ADC Bitwidth: '))
 gain = int(input('Enter IN-AMP Gain: '))
+strain = float(input('Enter Sensor Strain: '))
+sensor_val = sensor(100, strain, 1)
+calibrate()
+
+plt.plot(x_vals, y_vals, label = "Sensor Reading")
+plt.plot(x_vals, a_vals, label = "ADC Reading")
+
+plt.xlabel('ADC Value')
+plt.ylabel('Time (MS)')
+plt.legend()
+plt.show()
 
       
-t1.start()
-t2.start()
-ani = FuncAnimation(plt.gcf(), animate, interval=10)
-plt.tight_layout()
-plt.show()
+#t1.start()
+#t2.start()
+
+
+
+#ani = FuncAnimation(plt.gcf(), animate, interval=10)
+#plt.tight_layout()
+#plt.show()
 
 
 
