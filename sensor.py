@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 #import numpy as np
 
-plt.style.use('fivethirtyeight')
+#plt.style.use('fivethirtyeight')
 
 x_vals = []
 y_vals = []
@@ -186,8 +186,8 @@ calibrate()
 plt.plot(x_vals, y_vals, label = "Sensor Reading")
 plt.plot(x_vals, a_vals, label = "ADC Reading")
 
-plt.xlabel('ADC Value')
-plt.ylabel('Time (MS)')
+plt.xlabel('Time (MS)')
+plt.ylabel('ADC Value')
 plt.legend()
 plt.show()
 
